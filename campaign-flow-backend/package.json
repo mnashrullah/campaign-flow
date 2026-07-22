@@ -1,0 +1,33 @@
+{
+  "name": "campaign-flow-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Campaign Flow backend — high-throughput email engine: pluggable providers, adaptive rate control, retry/DLQ, circuit-breaker, live progress.",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "worker": "tsx watch src/worker/index.ts",
+    "worker:prod": "tsx src/worker/index.ts",
+    "db:migrate": "tsx src/db/migrate.ts",
+    "seed": "tsx src/scripts/seed.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.658.0",
+    "@fastify/cors": "^10.0.1",
+    "bullmq": "^5.34.0",
+    "drizzle-orm": "^0.38.0",
+    "fastify": "^5.2.0",
+    "ioredis": "^5.4.1",
+    "pg": "^8.13.1",
+    "resend": "^4.0.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  }
+}

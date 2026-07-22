@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* shadcn-style tokens — dark, indigo-accented. */
+@layer base {
+  :root {
+    --background: 222 30% 7%;
+    --foreground: 210 20% 92%;
+    --card: 222 26% 10%;
+    --card-foreground: 210 20% 92%;
+    --popover: 222 28% 9%;
+    --popover-foreground: 210 20% 92%;
+    --primary: 221 83% 60%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 20% 16%;
+    --secondary-foreground: 210 20% 92%;
+    --muted: 222 20% 15%;
+    --muted-foreground: 215 15% 58%;
+    --accent: 222 22% 18%;
+    --accent-foreground: 210 20% 92%;
+    --destructive: 0 72% 58%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 18% 20%;
+    --input: 220 18% 22%;
+    --ring: 221 83% 60%;
+    --radius: 0.6rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  html {
+    color-scheme: dark;
+  }
+}
+
+/* thin scrollbars in the sheet / tables */
+*::-webkit-scrollbar { width: 8px; height: 8px; }
+*::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }

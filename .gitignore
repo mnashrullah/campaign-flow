@@ -1,0 +1,38 @@
+# dependencies
+node_modules/
+**/node_modules/
+
+# env / secrets
+.env
+.env.local
+.env.*.local
+**/.env
+!**/.env.example
+
+# build output
+dist/
+build/
+**/dist/
+.next/
+**/.next/
+*.tsbuildinfo
+
+# logs
+*.log
+npm-debug.log*
+logs/
+
+# docker volumes / local data
+pgdata/
+redisdata/
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+Untitled-*
+
+# temp
+*.tmp
+.cache/
