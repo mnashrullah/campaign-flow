@@ -83,18 +83,18 @@ Two processes (API and worker) over Postgres + Redis. Only the **send worker** s
 ```mermaid
 flowchart LR
   subgraph client [Browser]
-    B["React SPA<br/>(Vite · shadcn · Tabler)"]
+    B["React SPA<br>Vite, shadcn, Tabler"]
   end
 
-  subgraph api [API · Fastify]
+  subgraph api [API - Fastify]
     R["REST routes"]
     SSE["SSE /stream"]
-    WHIN["Webhook endpoints<br/>/webhooks/ses · /webhooks/resend"]
+    WHIN["Webhook endpoints"]
   end
 
   subgraph worker [Worker process]
-    P["Producer<br/>(chunk fan-out)"]
-    S["Send worker ×N<br/>claim→validate→render→rate-gate→send→persist"]
+    P["Producer - chunk fan-out"]
+    S["Send worker xN<br>claim, validate, render, rate-gate, send"]
     AIMD["AIMD controller"]
     BRK["Circuit breaker"]
     REAP["Reaper"]
@@ -103,8 +103,8 @@ flowchart LR
   end
 
   subgraph data [State]
-    PG[("Postgres<br/>campaigns · recipients<br/>events · campaign_stats · suppression")]
-    RD[("Redis<br/>BullMQ queues · token bucket<br/>current_rate · live counters")]
+    PG[("Postgres<br>campaigns, recipients, events, stats, suppression")]
+    RD[("Redis<br>BullMQ, token bucket, counters")]
   end
 
   subgraph prov [EmailProvider enum]
@@ -119,17 +119,20 @@ flowchart LR
   P -->|~2000 chunk jobs| RD
   RD -->|pull chunk| S
   S -->|token bucket rate gate| RD
-  S -->|sendBatch| DR & SES & RES
-  S -->|txn status + stats| PG
+  S -->|sendBatch| DR
+  S --> SES
+  S --> RES
+  S -->|txn status and stats| PG
   S -->|bump counters| RD
-  AIMD <-->|current_rate / throttle| RD
+  AIMD <-->|current_rate and throttle| RD
   BRK -->|auto-pause on bad reputation| PG
   REAP -->|recover stuck sending| PG
   REC -->|COUNT audit| PG
-  SES & RES -.->|delivery / bounce / complaint| WHIN
+  SES -.->|delivery, bounce, complaint| WHIN
+  RES -.-> WHIN
   WHIN -->|enqueue| RD
   RD --> WK
-  WK -->|delivery_status + suppression| PG
+  WK -->|delivery status and suppression| PG
 ```
 
 **Why this shape:**
@@ -147,7 +150,7 @@ sequenceDiagram
   participant API as Fastify API
   participant RD as Redis (BullMQ)
   participant PR as Producer
-  participant W as Send worker ×N
+  participant W as Send worker xN
   participant PV as Provider
   participant PG as Postgres
   participant WK as Webhook worker
@@ -159,15 +162,15 @@ sequenceDiagram
   PR->>RD: addBulk ~2,000 chunk jobs (500 ids each)
   loop each chunk, N workers in parallel
     RD->>W: chunk job
-    W->>PG: claim pending→sending (FOR UPDATE SKIP LOCKED)
+    W->>PG: claim pending to sending (FOR UPDATE SKIP LOCKED)
     W->>RD: token bucket — wait for tokens at current_rate
     W->>PV: sendBatch (provider batch size)
     PV-->>W: per-recipient results
     W->>PG: ONE txn — status + campaign_stats
     W->>RD: bump live counters
-    Note over W: transient→retry, exhausted→DLQ,<br/>throttled→revert + AIMD signal
+    Note over W: transient retry, exhausted to DLQ,<br>throttled revert + AIMD signal
   end
-  PV--)API: async webhook (delivered / bounce / complaint)
+  PV-->>API: async webhook (delivered / bounce / complaint)
   API->>RD: enqueue webhook job
   RD->>WK: webhook job
   WK->>PG: monotonic delivery_status + suppress bounces/complaints
